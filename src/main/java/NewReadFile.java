@@ -1,13 +1,12 @@
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class NewReadFile {
 
     private static Map<Integer, Integer> storageMap;
-    private static List<Integer> keyList;
-    private static List<Integer> valueList;
+    private List<Integer> keyList;
+    private List<Integer> valueList;
 
     public NewReadFile() {
         this.storageMap = new HashMap<>();
@@ -15,39 +14,17 @@ public class NewReadFile {
         this.valueList = new ArrayList<>();
     }
 
-    public static Map<Integer, Integer> getStorageMap() {
-        return storageMap;
-    }
-
-    public static List<Integer> getKeyList() {
-        return keyList;
-    }
-
-    public static List<Integer> getValueList() {
-        return valueList;
-    }
-
-
-    public List<Integer> integerListSorter(List<Integer> inputList) {
-        return inputList.stream().sorted().collect(Collectors.toList());
-    }
-
-
     public void loadFile(String path) throws IOException {
-        String thisLine; // variable to read each line
-        BufferedReader myInput = null; // object to read the file
+        String thisLine;
+        BufferedReader myInput = null;
         try {
             FileInputStream fin = new FileInputStream(new File(path));
             myInput = new BufferedReader(new InputStreamReader(fin));
-            // for each line
+
             while ((thisLine = myInput.readLine()) != null) {
-                // if the line is not a comment, is not empty or is not other
-                // kind of metadata
                 if (!thisLine.isEmpty() &&
                         thisLine.charAt(0) != '#' && thisLine.charAt(0) != '%'
                         && thisLine.charAt(0) != '@') {
-                    // split the line according to spaces and then
-                    // call "addTransaction" to process this line.
                     Initializer(thisLine);
                 }
             }
@@ -60,14 +37,12 @@ public class NewReadFile {
         }
     }
 
-    public void Initializer(String str) {
-        String[] inputString = str.split(" ");
+    public void Initializer(String InputStr) {
         List<Integer> newList = new ArrayList<>();
-        for (String s : inputString) {
-            if (s.equals(":") || s.equals(" ") || s.equals("") || s.equals(" : "))
-                continue;
-            int i = Integer.parseInt(s);
-            newList.add(i);
+        String replace = InputStr.replace(":", " ");
+        String str[] = replace.split(" : ");
+        for (String currentStr : str) {
+            newList.add(Integer.parseInt(currentStr));
         }
         initialStage(newList);
     }
@@ -106,23 +81,24 @@ public class NewReadFile {
                 storageMap.put(currentKey, foundedValue);
             }
         }
-//        System.out.println("=====================================");
-//        TreeMap<Integer, Integer> sorted = new TreeMap<>(storageMap);
-//        Set<Map.Entry<Integer, Integer>> mapping = sorted.entrySet();
-//        for (Map.Entry<Integer, Integer> integerIntegerEntry : mapping) {
-//            System.out.println(integerIntegerEntry.getKey() + " ==> " + integerIntegerEntry.getValue());
-//        }
-        System.out.println("=====================================");
-         storageMap.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(System.out::println);
-
-
-
     }
+
+    private Map<Integer, Integer> convertor(Map<Integer, Integer> inputMap) {
+        return inputMap.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y, LinkedHashMap::new));
+    }
+
+    private Set<Integer> keyFinder(Map<Integer, Integer> inputMap) {
+        return inputMap.keySet();
+    }
+
 
     public static void main(String[] args) throws IOException {
         NewReadFile newReadFile = new NewReadFile();
         String path = "C:\\Users\\m_malakouti\\IdeaProjects\\Transaction-Matrix\\src\\main\\java\\foodmart2.txt";
         newReadFile.loadFile(path);
+        System.out.println(newReadFile.convertor(storageMap));
+        System.out.println(newReadFile.keyFinder(newReadFile.convertor(storageMap)));
 
     }
 
